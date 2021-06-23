@@ -32,19 +32,6 @@ namespace Posting_Service.Controllers
 			{
 				return BadRequest();
 			}
-			//List<Post> postList;
-			//try
-			//{
-			//	using (var session = fluentNHibernateHelper.OpenSession())
-			//	{
-			//		postList = await session.Query<Post>().ToListAsync();
-			//	}
-			//	return Ok(postList);
-			//}
-			//catch
-			//{
-			//	return BadRequest();
-			//}
 		}
 
 		[HttpGet("GetUserPosts")]
@@ -60,19 +47,6 @@ namespace Posting_Service.Controllers
 			{
 				return BadRequest();
 			}
-			//List<Post> postList;
-			//try
-			//{
-			//	using (var session = fluentNHibernateHelper.OpenSession())
-			//	{
-			//		postList = await session.Query<Post>().Where(x => x.userId == uid).ToListAsync();
-			//	}
-			//	return Ok(postList);
-			//}
-			//catch
-			//{
-			//	return BadRequest();
-			//}
 		}
 
 		[HttpPost]
@@ -128,24 +102,6 @@ namespace Posting_Service.Controllers
 			{
 				return BadRequest("Something went wrong");
 			}
-			//try
-			//{
-			//	using (var session = fluentNHibernateHelper.OpenSession())
-			//	{
-			//		using (var transaction = session.BeginTransaction())
-			//		{
-			//			var currentLikes = await session.GetAsync<Post>(post.id);
-			//			currentLikes.likes++;
-			//			await session.SaveOrUpdateAsync(currentLikes);
-			//			transaction.Commit();
-			//		}
-			//	}
-			//	return NoContent();
-			//}
-			//catch
-			//{
-			//	return BadRequest();
-			//}
 		}
 
 		// DELETE: api/ApiWithActions/5
@@ -167,22 +123,6 @@ namespace Posting_Service.Controllers
 			{
 				return BadRequest("Something went wrong");
 			}
-			//try
-			//{
-			//	using (var session = fluentNHibernateHelper.OpenSession())
-			//	{
-			//		using (var transaction = session.BeginTransaction())
-			//		{
-			//			await session.DeleteAsync(post);
-			//			transaction.Commit();
-			//		}
-			//	}
-			//	return NoContent();
-			//}
-			//catch
-			//{
-			//	return BadRequest();
-			//}
 		}
 	}
 }
