@@ -1,85 +1,92 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Post_Service.Data;
+using Post_Service.Models.Entity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Posting_Service.Models;
-using Posting_Service.SessionFactory;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using NHibernate.Linq;
+
 namespace Posting_Service.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
 	public class PostController : ControllerBase
 	{
-		FluentNHibernateHelper fluentNHibernateHelper;
-
-		public PostController(IConfiguration configuration)
+		private readonly ApplicationDbContext context;
+		public PostController(ApplicationDbContext context)
 		{
-			fluentNHibernateHelper = new FluentNHibernateHelper(configuration);
+			this.context = context;
 		}
 
-
 		[HttpGet]
-		public async Task<IActionResult> GetAll()
+		public async Task<ActionResult<IEnumerable<Post>>> GetAll()
 		{
-			List<Post> postList;
 			try
 			{
-				using (var session = fluentNHibernateHelper.OpenSession())
-				{
-					postList = await session.Query<Post>().ToListAsync();
-				}
-				return Ok(postList);
+				var result = await context.Post.ToListAsync();
+				return Ok(result);
 			}
 			catch
 			{
 				return BadRequest();
 			}
+			//List<Post> postList;
+			//try
+			//{
+			//	using (var session = fluentNHibernateHelper.OpenSession())
+			//	{
+			//		postList = await session.Query<Post>().ToListAsync();
+			//	}
+			//	return Ok(postList);
+			//}
+			//catch
+			//{
+			//	return BadRequest();
+			//}
 		}
 
 		[HttpGet("GetUserPosts")]
 		public async Task<IActionResult> Get(string uid)
 		{
-			List<Post> postList;
 			try
 			{
-				using (var session = fluentNHibernateHelper.OpenSession())
-				{
-					postList = await session.Query<Post>().Where(x => x.userId == uid).ToListAsync();
-				}
-				return Ok(postList);
+				var result = await context.Post.Where(x => x.userId.Equals(uid))
+					.OrderByDescending(x => x.DateTime).ToListAsync();
+				return Ok(result);
 			}
 			catch
 			{
 				return BadRequest();
 			}
+			//List<Post> postList;
+			//try
+			//{
+			//	using (var session = fluentNHibernateHelper.OpenSession())
+			//	{
+			//		postList = await session.Query<Post>().Where(x => x.userId == uid).ToListAsync();
+			//	}
+			//	return Ok(postList);
+			//}
+			//catch
+			//{
+			//	return BadRequest();
+			//}
 		}
 
-		// POST: api/Account
 		[HttpPost]
 		public async Task<IActionResult> Post([FromBody] Post post)
 		{
-			post.id = Guid.NewGuid().ToString();
-			post.likes = 0;
 			try
 			{
-				using (var session = fluentNHibernateHelper.OpenSession())
-				{
-					using (var transaction = session.BeginTransaction())
-					{
-						await session.SaveOrUpdateAsync(post);
-						transaction.Commit();
-					}
-				}
-				return Created("lifelinks", post);
+				await context.Post.AddAsync(post);
+				await context.SaveChangesAsync();
+				return Created("post", post);
 			}
 			catch
 			{
-				return BadRequest();
+				return BadRequest("Something went wrong");
 			}
 		}
 
@@ -88,19 +95,18 @@ namespace Posting_Service.Controllers
 		{
 			try
 			{
-				using (var session = fluentNHibernateHelper.OpenSession())
+				var result = await context.Post.FindAsync(post.Id);
+				if(result == null)
 				{
-					using (var transaction = session.BeginTransaction())
-					{
-						await session.SaveOrUpdateAsync(post);
-						transaction.Commit();
-					}
+					return BadRequest("Post does not exist");
 				}
+				result.postContent = post.postContent;
+				await context.SaveChangesAsync();
 				return NoContent();
 			}
 			catch
 			{
-				return BadRequest();
+				return NotFound();
 			}
 		}
 
@@ -109,22 +115,37 @@ namespace Posting_Service.Controllers
 		{
 			try
 			{
-				using (var session = fluentNHibernateHelper.OpenSession())
+				var result = await context.Post.FindAsync(post.Id);
+				if (result == null)
 				{
-					using (var transaction = session.BeginTransaction())
-					{
-						var currentLikes = await session.GetAsync<Post>(post.id);
-						currentLikes.likes++;
-						await session.SaveOrUpdateAsync(currentLikes);
-						transaction.Commit();
-					}
+					return NotFound();
 				}
+				result.likes++;
+				await context.SaveChangesAsync();
 				return NoContent();
 			}
 			catch
 			{
-				return BadRequest();
+				return BadRequest("Something went wrong");
 			}
+			//try
+			//{
+			//	using (var session = fluentNHibernateHelper.OpenSession())
+			//	{
+			//		using (var transaction = session.BeginTransaction())
+			//		{
+			//			var currentLikes = await session.GetAsync<Post>(post.id);
+			//			currentLikes.likes++;
+			//			await session.SaveOrUpdateAsync(currentLikes);
+			//			transaction.Commit();
+			//		}
+			//	}
+			//	return NoContent();
+			//}
+			//catch
+			//{
+			//	return BadRequest();
+			//}
 		}
 
 		// DELETE: api/ApiWithActions/5
@@ -133,21 +154,35 @@ namespace Posting_Service.Controllers
 		{
 			try
 			{
-				using (var session = fluentNHibernateHelper.OpenSession())
+				var result = await context.Post.FindAsync(post.Id);
+				if (result == null)
 				{
-					using (var transaction = session.BeginTransaction())
-					{
-						await session.DeleteAsync(post);
-						transaction.Commit();
-					}
+					return NotFound();
 				}
-				return NoContent();
+				context.Post.Remove(result);
+				await context.SaveChangesAsync();
+				return StatusCode(202);
 			}
 			catch
 			{
-				return BadRequest();
+				return BadRequest("Something went wrong");
 			}
-
+			//try
+			//{
+			//	using (var session = fluentNHibernateHelper.OpenSession())
+			//	{
+			//		using (var transaction = session.BeginTransaction())
+			//		{
+			//			await session.DeleteAsync(post);
+			//			transaction.Commit();
+			//		}
+			//	}
+			//	return NoContent();
+			//}
+			//catch
+			//{
+			//	return BadRequest();
+			//}
 		}
 	}
 }

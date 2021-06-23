@@ -1,16 +1,12 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Post_Service.Data;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Post_Service
 {
@@ -26,6 +22,17 @@ namespace Post_Service
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
+			services.AddDbContext<ApplicationDbContext>(options =>
+			{
+				options.UseMySql(
+					Configuration.GetConnectionString("Default"),
+					new MySqlServerVersion(new Version(8, 0, 25)),
+				mySqlOptions =>
+				{
+					mySqlOptions.EnableRetryOnFailure(maxRetryCount: 3);
+				});
+			});
+
 			services.AddCors();
 
 			services.AddControllers();
