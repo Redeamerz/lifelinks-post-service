@@ -35,6 +35,8 @@ namespace Post_Service
 
 			services.AddCors();
 
+			services.AddSingleton<IHostedService, KafkaConsumerHandler>();
+
 			services.AddControllers();
 			services.AddAuthentication();
 			services.AddSwaggerGen(c =>
