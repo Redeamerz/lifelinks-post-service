@@ -22,7 +22,7 @@ namespace Post_Service
 			var conf = new ConsumerConfig
 			{
 				GroupId = "st_comsumer_group",
-				BootstrapServers = "kafka.lifelinks.svc.cluster.local",
+				BootstrapServers = "kafka",
 				AutoOffsetReset = AutoOffsetReset.Earliest
 			};
 
