@@ -34,8 +34,8 @@ namespace Post_Service
 				});
 			});
 
-			services.AddSingleton<IHostedService, KafkaConsumerHandler>();
-			services.AddSingleton<PostHandler>();
+			//services.AddSingleton<IHostedService, KafkaConsumerHandler>();
+			//services.AddSingleton<PostHandler>();
 
 			services.AddControllers();
 
