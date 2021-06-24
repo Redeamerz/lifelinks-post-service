@@ -21,7 +21,7 @@ namespace Post_Service
 		{
 			var conf = new ConsumerConfig
 			{
-				GroupId = "st_comsumer_group",
+				GroupId = "post_comsumer_group",
 				BootstrapServers = "kafka",
 				AutoOffsetReset = AutoOffsetReset.Earliest
 			};

@@ -24,8 +24,11 @@ namespace Post_Service.Logic
 				try
 				{
 					var result = await context.Post.Where(x => x.userId.ToString() == guid).ToListAsync();
-					context.RemoveRange(result);
-					await context.SaveChangesAsync();
+					if (result.Count > 0)
+					{
+						context.RemoveRange(result);
+						await context.SaveChangesAsync();
+					}
 				}
 				catch (Exception e)
 				{
