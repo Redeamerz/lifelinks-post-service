@@ -5,18 +5,24 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Confluent.Kafka;
+using Post_Service.Logic;
 
 namespace Post_Service
 {
 	public class KafkaConsumerHandler : IHostedService
 	{
 		private readonly string topic = "gdpr_topic";
+		private readonly PostHandler postHandler;
+		public KafkaConsumerHandler(PostHandler postHandler)
+		{
+			this.postHandler = postHandler;
+		}
 		public Task StartAsync(CancellationToken cancellationToken)
 		{
 			var conf = new ConsumerConfig
 			{
 				GroupId = "st_comsumer_group",
-				BootstrapServers = "localhost:9092",
+				BootstrapServers = "kafka.lifelinks.svc.cluster.local",
 				AutoOffsetReset = AutoOffsetReset.Earliest
 			};
 
@@ -28,8 +34,9 @@ namespace Post_Service
 				{
 					while (true)
 					{
-						var consuner = builder.Consume(cancelToken.Token);
-						Console.WriteLine($"Message: {consuner.Message.Value} received from {consuner.TopicPartitionOffset}");
+						var consumer = builder.Consume(cancelToken.Token);
+						Console.WriteLine($"Message: {consumer.Message.Value} received from {consumer.TopicPartitionOffset}");
+						postHandler.DeleteAllPostsByUser(consumer.Message.Value);
 					}
 				}
 				catch (Exception)

@@ -124,5 +124,6 @@ namespace Posting_Service.Controllers
 				return BadRequest("Something went wrong");
 			}
 		}
+
 	}
 }

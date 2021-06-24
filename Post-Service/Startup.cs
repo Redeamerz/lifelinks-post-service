@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Post_Service.Data;
+using Post_Service.Logic;
 using System;
 
 namespace Post_Service
@@ -36,6 +37,7 @@ namespace Post_Service
 			services.AddCors();
 
 			services.AddSingleton<IHostedService, KafkaConsumerHandler>();
+			services.AddSingleton<PostHandler>();
 
 			services.AddControllers();
 			services.AddAuthentication();
