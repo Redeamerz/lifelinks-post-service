@@ -9,47 +9,67 @@ using Post_Service.Logic;
 
 namespace Post_Service
 {
-	public class KafkaConsumerHandler : IHostedService
+	public class KafkaConsumerHandler : BackgroundService
 	{
 		private readonly string topic = "gdpr_topic";
 		private readonly PostHandler postHandler;
+		private readonly IConsumer<Ignore, string> kafkaConsumer;
+		private readonly ConsumerConfig config;
 		public KafkaConsumerHandler(PostHandler postHandler)
 		{
 			this.postHandler = postHandler;
-		}
-		public Task StartAsync(CancellationToken cancellationToken)
-		{
-			var conf = new ConsumerConfig
+			config = new ConsumerConfig
 			{
 				GroupId = "post_comsumer_group",
 				BootstrapServers = "kafka",
 				AutoOffsetReset = AutoOffsetReset.Earliest
 			};
+			this.kafkaConsumer = new ConsumerBuilder<Ignore, string>(config).Build();
+		}
+		protected override Task ExecuteAsync(CancellationToken cancellationToken)
+		{
+			new Thread(() => StartConsumerLoop(cancellationToken)).Start();
 
-			using(var builder = new ConsumerBuilder<Ignore, string>(conf).Build())
-			{
-				builder.Subscribe(topic);
-				var cancelToken = new CancellationTokenSource();
-				try
-				{
-					while (true)
-					{
-						var consumer = builder.Consume(cancelToken.Token);
-						Console.WriteLine($"Message: {consumer.Message.Value} received from {consumer.TopicPartitionOffset}");
-						postHandler.DeleteAllPostsByUser(consumer.Message.Value);
-					}
-				}
-				catch (Exception)
-				{
-					builder.Close();
-				}
-			}
 			return Task.CompletedTask;
 		}
 
-		public Task StopAsync(CancellationToken cancellationToken)
+		private void StartConsumerLoop(CancellationToken cancellationToken)
 		{
-			return Task.CompletedTask;
+			kafkaConsumer.Subscribe(this.topic);
+			while (!cancellationToken.IsCancellationRequested)
+			{
+				try
+				{
+					var cr = this.kafkaConsumer.Consume(cancellationToken);
+					postHandler.DeleteAllPostsByUser(cr.Message.Value); 
+					Console.WriteLine($"{cr.Message.Key}: {cr.Message.Value}ms");
+				}
+				catch (OperationCanceledException)
+				{
+					break;
+				}
+				catch (ConsumeException e)
+				{
+					Console.WriteLine($"Consume error: {e.Error.Reason}");
+
+					if (e.Error.IsFatal)
+					{
+						break;
+					}
+				}
+				catch (Exception e)
+				{
+					Console.WriteLine($"Unexpected error: {e}");
+				}
+			}
+		}
+
+		public override void Dispose()
+		{
+			this.kafkaConsumer.Close();
+			this.kafkaConsumer.Dispose();
+
+			base.Dispose();
 		}
 	}
 }
