@@ -1,11 +1,9 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using Confluent.Kafka;
+using Microsoft.Extensions.Hosting;
+using Post_Service.Logic;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Confluent.Kafka;
-using Post_Service.Logic;
 
 namespace Post_Service
 {
@@ -15,6 +13,7 @@ namespace Post_Service
 		private readonly PostHandler postHandler;
 		private readonly IConsumer<Ignore, string> kafkaConsumer;
 		private readonly ConsumerConfig config;
+
 		public KafkaConsumerHandler(PostHandler postHandler)
 		{
 			this.postHandler = postHandler;
@@ -26,6 +25,7 @@ namespace Post_Service
 			};
 			this.kafkaConsumer = new ConsumerBuilder<Ignore, string>(config).Build();
 		}
+
 		protected override Task ExecuteAsync(CancellationToken cancellationToken)
 		{
 			new Thread(() => StartConsumerLoop(cancellationToken)).Start();
@@ -41,7 +41,7 @@ namespace Post_Service
 				try
 				{
 					var cr = this.kafkaConsumer.Consume(cancellationToken);
-					postHandler.DeleteAllPostsByUser(cr.Message.Value); 
+					postHandler.DeleteAllPostsByUser(cr.Message.Value);
 					Console.WriteLine($"{cr.Message.Key}: {cr.Message.Value}ms");
 				}
 				catch (OperationCanceledException)

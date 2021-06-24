@@ -54,7 +54,7 @@ namespace Post_Service
 				app.UseSwagger();
 				app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Post_Service v1"));
 			}
-			
+
 			app.UseRouting();
 
 			app.UseAuthorization();

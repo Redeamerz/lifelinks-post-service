@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Post_Service.Data;
 using Post_Service.Models.Entity;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,6 +13,7 @@ namespace Posting_Service.Controllers
 	public class PostController : ControllerBase
 	{
 		private readonly ApplicationDbContext context;
+
 		public PostController(ApplicationDbContext context)
 		{
 			this.context = context;
@@ -70,7 +69,7 @@ namespace Posting_Service.Controllers
 			try
 			{
 				var result = await context.Post.FindAsync(post.Id);
-				if(result == null)
+				if (result == null)
 				{
 					return BadRequest("Post does not exist");
 				}
@@ -124,6 +123,5 @@ namespace Posting_Service.Controllers
 				return BadRequest("Something went wrong");
 			}
 		}
-
 	}
 }

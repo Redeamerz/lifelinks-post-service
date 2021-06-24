@@ -4,13 +4,13 @@ using Post_Service.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Post_Service.Logic
 {
 	public class PostHandler
 	{
 		private readonly IServiceProvider serviceProvider;
+
 		public PostHandler(IServiceProvider serviceProvider)
 		{
 			this.serviceProvider = serviceProvider;
