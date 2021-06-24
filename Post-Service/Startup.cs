@@ -34,13 +34,11 @@ namespace Post_Service
 				});
 			});
 
-			services.AddCors();
-
 			services.AddSingleton<IHostedService, KafkaConsumerHandler>();
 			services.AddSingleton<PostHandler>();
 
 			services.AddControllers();
-			services.AddAuthentication();
+
 			services.AddSwaggerGen(c =>
 			{
 				c.SwaggerDoc("v1", new OpenApiInfo { Title = "Post_Service", Version = "v1" });
@@ -56,11 +54,7 @@ namespace Post_Service
 				app.UseSwagger();
 				app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Post_Service v1"));
 			}
-			app.UseCors(
-				options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-
-			app.UseHttpsRedirection();
-
+			
 			app.UseRouting();
 
 			app.UseAuthorization();

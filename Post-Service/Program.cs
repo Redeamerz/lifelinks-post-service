@@ -20,10 +20,6 @@ namespace Post_Service
 				.ConfigureWebHostDefaults(webBuilder =>
 				{
 					webBuilder.UseStartup<Startup>();
-				})
-				.ConfigureLogging((hostingContext, logging) =>
-				{
-					logging.AddConsole();
 				});
 	}
 }
