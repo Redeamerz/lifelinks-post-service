@@ -39,7 +39,7 @@ namespace Posting_Service.Controllers
 			try
 			{
 				var result = await context.Post.Where(x => x.userId.Equals(uid))
-					.OrderByDescending(x => x.DateTime).ToListAsync();
+					.OrderBy(x => x.DateTime).ToListAsync();
 				return Ok(result);
 			}
 			catch
